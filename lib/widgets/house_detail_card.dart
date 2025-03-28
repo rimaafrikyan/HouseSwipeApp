@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:house_swipe_app/providers/dislike_manager.dart';
 import 'package:house_swipe_app/providers/favorite_manager.dart';
+import 'package:house_swipe_app/providers/house_manager.dart';
+import 'package:house_swipe_app/screens/home_screen.dart';
 import 'package:house_swipe_app/screens/house_details_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -38,8 +40,7 @@ class _HouseDetailCardState extends State<HouseDetailCard> {
 
   @override
   Widget build(BuildContext context) {
-    final favoriteManager =
-        Provider.of<FavoriteManager>(context); 
+    final favoriteManager = Provider.of<FavoriteManager>(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = screenWidth * 0.9;
 
@@ -204,12 +205,11 @@ class _HouseDetailCardState extends State<HouseDetailCard> {
             ),
           ],
         ),
-        Container( 
+        Container(
           width: cardWidth,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
             children: [
-
               GestureDetector(
                 onTap: () {
                   setState(() {
@@ -228,42 +228,37 @@ class _HouseDetailCardState extends State<HouseDetailCard> {
                 child: Image.asset(
                   isFavorite
                       ? 'assets/images/favorite2.png'
-                      : 'assets/images/favorite.png', 
+                      : 'assets/images/favorite.png',
                   width: 40,
                   height: 40,
                 ),
               ),
               SizedBox(width: 10),
-              
+
               // Image.asset(
               //   'assets/images/close.png',
               //   width: 40,
               //   height: 40,
               // ),
-          
+
               GestureDetector(
                 onTap: () {
-                  final dislikeManager =
-                      Provider.of<DislikeManager>(context, listen: false);
-                  dislikeManager.addDislike({
-                    'imagePath': widget.imagePath,
-                    'title': widget.title,
-                    'price': widget.price,
-                  });
-
+                  final houseManager =
+                      Provider.of<HouseManager>(context, listen: false);
                   final favoriteManager =
                       Provider.of<FavoriteManager>(context, listen: false);
+
                   if (favoriteManager.favorites
                       .any((h) => h['title'] == widget.title)) {
                     favoriteManager.removeFavorite(widget.title);
-                    setState(() => isFavorite = false);
                   }
+
+                  houseManager.removeAndAddToDisliked(widget.title);
+
+                  if (Navigator.of(context).canPop()) Navigator.pop(context);
                 },
-                child: Image.asset(
-                  'assets/images/close.png',
-                  width: 40,
-                  height: 40,
-                ),
+                child: Image.asset('assets/images/close.png',
+                    width: 40, height: 40),
               ),
               Spacer(),
               GestureDetector(

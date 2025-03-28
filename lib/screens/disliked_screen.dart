@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:house_swipe_app/providers/dislike_manager.dart';
+import 'package:house_swipe_app/providers/house_manager.dart';
+import 'package:house_swipe_app/screens/home_screen.dart';
+import 'package:house_swipe_app/screens/house_details_screen.dart';
 import 'package:house_swipe_app/utils/theme.dart';
 import 'package:house_swipe_app/widgets/house_leked_card.dart';
 import 'package:provider/provider.dart';
@@ -12,37 +15,58 @@ class DislikedScreen extends StatefulWidget {
 }
 
 class _DislikedScreenState extends State<DislikedScreen> {
-  final dislikeManager = DislikeManager();
   @override
   Widget build(BuildContext context) {
-    final dislikeManager = Provider.of<DislikeManager>(context);
+    final houseManager = Provider.of<HouseManager>(context);
+
+    if (houseManager.dislikedHouses.isEmpty) {
+      return const Center(child: Text("No disliked houses yet"));
+    }
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Center(
-            child: Column(
-            children: [
-              SizedBox(
-                child: Image.asset("assets/images/close.png"),
-              ),
-              const SizedBox(height: 20),
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 1,
-                  childAspectRatio: 3, 
-                  children: dislikeManager.dislikes.map((house) {
-                    return HouseLekedCard(
+        child: Column(
+          children: [
+            Image.asset("assets/images/close.png", width: 40, height: 40),
+            const SizedBox(height: 20),
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 1,
+                childAspectRatio: 3,
+                children: houseManager.dislikedHouses.map((house) {
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HouseDetailsScreen(
+                            imagePath: house['imagePath'],
+                            title: house['title'],
+                            price: house['price'] ?? 'No price',
+                            description: house['description'] ?? '',
+                            area: house['area'] ?? '',
+                            quantity: house['quantity'] ?? '',
+                            detailedDescription:
+                                house['detailedDescription'] ?? '',
+                            keyFeatures:
+                                List<String>.from(house['keyFeatures'] ?? []),
+                            location: house['location'] ?? '',
+                          ),
+                        ),
+                      );
+                    },
+                    child: HouseLekedCard(
                       imagePath: house['imagePath'],
                       title: house['title'],
                       price: house['price'] ?? 'No price',
-                    );
-                  }).toList(),
-                ),
+                    ),
+                  );
+                }).toList(),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

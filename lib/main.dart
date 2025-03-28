@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:house_swipe_app/providers/dislike_manager.dart';
 import 'package:house_swipe_app/providers/favorite_manager.dart';
+import 'package:house_swipe_app/providers/house_manager.dart';
 import 'package:house_swipe_app/providers/house_provider.dart';
 import 'package:house_swipe_app/screens/home_screen.dart';
 import 'package:house_swipe_app/screens/welcome_screen.dart';
@@ -25,6 +26,7 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => HouseManager()),
         ChangeNotifierProvider(create: (_) => FavoriteManager()),
         ChangeNotifierProvider(create: (_) => DislikeManager()),
       ],
