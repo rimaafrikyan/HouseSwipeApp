@@ -6,25 +6,26 @@ class FavoriteManager extends ChangeNotifier {
   List<Map<String, dynamic>> get favorites => _favoriteHouses;
 
   void addFavorite(Map<String, dynamic> house) {
+    assert(house['id'] != null, 'ID is required');
     assert(house['imagePath'] != null, 'Image path is required');
     assert(house['title'] != null, 'Title is required');
 
     _favoriteHouses.add({
+      'id': house['id'],
       'imagePath': house['imagePath'],
       'title': house['title'],
       'price': house['price'] ?? 'Price not set',
-      'addedAt': DateTime.now(),
     });
     notifyListeners();
   }
 
-  void removeFavorite(String title) {
-    _favoriteHouses.removeWhere((house) => house['title'] == title);
+  void removeFavorite(int id) {
+    _favoriteHouses.removeWhere((house) => house['id'] == id);
     notifyListeners();
   }
 
-  bool isFavorite(String title) {
-    return _favoriteHouses.any((house) => house['title'] == title);
+  bool isFavorite(int id) {
+    return _favoriteHouses.any((house) => house['id'] == id);
   }
 
   void clearAll() {

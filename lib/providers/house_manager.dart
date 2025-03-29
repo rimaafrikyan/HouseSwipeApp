@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class HouseManager extends ChangeNotifier {
   List<Map<String, dynamic>> houses = [
     {
+      'id': 1,
       'imagePath': 'assets/images/home1.png',
       'title': 'Modern Luxury Home',
       'price': '395.75 UFS',
@@ -22,6 +23,7 @@ class HouseManager extends ChangeNotifier {
       'location': 'Yerevan'
     },
     {
+      'id': 2,
       'imagePath': 'assets/images/home2.png',
       'title': 'Elegant Home',
       'price': '500.95 UFS',
@@ -41,6 +43,7 @@ class HouseManager extends ChangeNotifier {
       'location': 'Yerevan'
     },
     {
+      'id': 3,
       'imagePath': 'assets/images/home3.png',
       'title': 'Modern Home',
       'price': '695.75 UFS',
@@ -60,6 +63,7 @@ class HouseManager extends ChangeNotifier {
       'location': 'Yerevan'
     },
     {
+      'id': 4,
       'imagePath': 'assets/images/home4.png',
       'title': 'Elegant Home',
       'price': '700.95 UFS',
@@ -79,32 +83,32 @@ class HouseManager extends ChangeNotifier {
       'location': 'Yerevan'
     },
   ];
- List<Map<String, dynamic>> dislikedHouses = [];
+  List<Map<String, dynamic>> dislikedHouses = [];
 
-void removeAndAddToDisliked(String title) {
-  debugPrint('Removing house: $title');
-  try {
-    final house = houses.firstWhere((h) => h['title'] == title);
-    houses.removeWhere((h) => h['title'] == title);
-    dislikedHouses.add(house);
-    debugPrint('House moved to disliked: ${house['title']}');
-    debugPrint('Remaining houses: ${houses.length}');
-    debugPrint('Disliked houses: ${dislikedHouses.length}');
-    notifyListeners();
-  } catch (e) {
-    debugPrint('Error removing house: $e');
+  void removeAndAddToDisliked(int id) {
+    debugPrint('Removing house: $id');
+    try {
+      final house = houses.firstWhere((h) => h['id'] == id);
+      houses.removeWhere((h) => h['id'] == id);
+      dislikedHouses.add(house);
+      debugPrint('House moved to disliked: ${house['title']}');
+      debugPrint('Remaining houses: ${houses.length}');
+      debugPrint('Disliked houses: ${dislikedHouses.length}');
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error removing house: $e');
+    }
   }
-}
 
-void restoreFromDisliked(String title) {
-  try {
-    final house = dislikedHouses.firstWhere((h) => h['title'] == title);
-    dislikedHouses.removeWhere((h) => h['title'] == title);
-    houses.add(house);
-    notifyListeners();
-    debugPrint('House $title restored from disliked');
-  } catch (e) {
-    debugPrint('Error restoring house: $e');
+  void restoreFromDisliked(int id) {
+    try {
+      final house = dislikedHouses.firstWhere((h) => h['id'] == id);
+      dislikedHouses.removeWhere((h) => h['id'] == id);
+      houses.add(house);
+      notifyListeners();
+      debugPrint('House $id restored from disliked');
+    } catch (e) {
+      debugPrint('Error restoring house: $e');
+    }
   }
-}
 }

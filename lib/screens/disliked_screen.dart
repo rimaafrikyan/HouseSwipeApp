@@ -42,6 +42,7 @@ class _DislikedScreenState extends State<DislikedScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => HouseDetailsScreen(
+                            id: house['id'] ?? 0,
                             imagePath: house['imagePath'],
                             title: house['title'],
                             price: house['price'] ?? 'No price',

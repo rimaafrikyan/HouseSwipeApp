@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:house_swipe_app/providers/dislike_manager.dart';
 import 'package:house_swipe_app/providers/favorite_manager.dart';
 import 'package:house_swipe_app/providers/house_manager.dart';
+import 'package:house_swipe_app/providers/saved_manager.dart';
 import 'package:house_swipe_app/screens/home_screen.dart';
 import 'package:house_swipe_app/screens/house_details_screen.dart';
 import 'package:provider/provider.dart';
 
 class HouseDetailCard extends StatefulWidget {
+  final int id;
   final String imagePath;
   final String title;
   final String price;
@@ -18,6 +20,7 @@ class HouseDetailCard extends StatefulWidget {
   final String location;
 
   const HouseDetailCard({
+    required this.id,
     required this.imagePath,
     required this.title,
     required this.price,
@@ -36,16 +39,18 @@ class HouseDetailCard extends StatefulWidget {
 
 class _HouseDetailCardState extends State<HouseDetailCard> {
   bool isFavorite = false;
-  bool isSaved = false;
+  // bool isSaved = false;
 
   @override
   Widget build(BuildContext context) {
+    final savedManager = Provider.of<SavedManager>(context);
+    final isSaved = savedManager.savedHouses.any((h) => h['id'] == widget.id);
     final favoriteManager = Provider.of<FavoriteManager>(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = screenWidth * 0.9;
 
-    isFavorite = favoriteManager.favorites
-        .any((house) => house['title'] == widget.title);
+    isFavorite =
+        favoriteManager.favorites.any((house) => house['id'] == widget.id);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -58,6 +63,7 @@ class _HouseDetailCardState extends State<HouseDetailCard> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => HouseDetailsScreen(
+                      id: widget.id,
                       imagePath: widget.imagePath,
                       title: widget.title,
                       price: widget.price,
@@ -216,12 +222,13 @@ class _HouseDetailCardState extends State<HouseDetailCard> {
                     isFavorite = !isFavorite;
                     if (isFavorite) {
                       favoriteManager.addFavorite({
+                        'id': widget.id,
                         'imagePath': widget.imagePath,
                         'title': widget.title,
                         'price': widget.price,
                       });
                     } else {
-                      favoriteManager.removeFavorite(widget.title);
+                      favoriteManager.removeFavorite(widget.id);
                     }
                   });
                 },
@@ -234,13 +241,6 @@ class _HouseDetailCardState extends State<HouseDetailCard> {
                 ),
               ),
               SizedBox(width: 10),
-
-              // Image.asset(
-              //   'assets/images/close.png',
-              //   width: 40,
-              //   height: 40,
-              // ),
-
               GestureDetector(
                 onTap: () {
                   final houseManager =
@@ -249,11 +249,11 @@ class _HouseDetailCardState extends State<HouseDetailCard> {
                       Provider.of<FavoriteManager>(context, listen: false);
 
                   if (favoriteManager.favorites
-                      .any((h) => h['title'] == widget.title)) {
-                    favoriteManager.removeFavorite(widget.title);
+                      .any((h) => h['id'] == widget.id)) {
+                    favoriteManager.removeFavorite(widget.id);
                   }
 
-                  houseManager.removeAndAddToDisliked(widget.title);
+                  houseManager.removeAndAddToDisliked(widget.id);
 
                   if (Navigator.of(context).canPop()) Navigator.pop(context);
                 },
@@ -263,12 +263,27 @@ class _HouseDetailCardState extends State<HouseDetailCard> {
               Spacer(),
               GestureDetector(
                 onTap: () {
-                  setState(() {
-                    isSaved = !isSaved;
-                  });
+                  final savedManager =
+                      Provider.of<SavedManager>(context, listen: false);
+                  final houseManager =
+                      Provider.of<HouseManager>(context, listen: false);
+
+                  final fullHouseData = houseManager.houses.firstWhere(
+                    (h) => h['id'] == widget.id,
+                    orElse: () => {},
+                  );
+
+                  if (fullHouseData.isNotEmpty) {
+                    if (savedManager.savedHouses
+                        .any((h) => h['id'] == widget.id)) {
+                      savedManager.removeSaved(widget.id);
+                    } else {
+                      savedManager.addSaved(fullHouseData);
+                    }
+                  }
                 },
                 child: Image.asset(
-                  isSaved
+                  savedManager.savedHouses.any((h) => h['id'] == widget.id)
                       ? 'assets/images/save2.png'
                       : 'assets/images/save.png',
                   width: 40,

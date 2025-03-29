@@ -54,7 +54,7 @@ class _LikedScreenState extends State<LikedScreen>
                   childAspectRatio: 3,
                   children: favoriteManager.favorites.map((house) {
                     final fullHouseData = houseManager.houses.firstWhere(
-                      (h) => h['title'] == house['title'],
+                      (h) => h['id'] == house['id'],
                       orElse: () => {},
                     );
 
@@ -65,6 +65,7 @@ class _LikedScreenState extends State<LikedScreen>
                             context,
                             MaterialPageRoute(
                               builder: (context) => HouseDetailsScreen(
+                                id: house['id'],
                                 imagePath: house['imagePath'],
                                 title: house['title'],
                                 price: house['price'] ?? 'No price',

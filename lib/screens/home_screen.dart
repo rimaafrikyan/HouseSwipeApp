@@ -44,10 +44,17 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(194, 115, 130, 146),
-        // title: Text(
-        //   'Home',
-        //   style: Theme.of(context).appBarTheme.titleTextStyle,
-        // ),
+        title: Center(
+          child: Text(
+            'Swipe your dream home',
+            style: TextStyle(
+              color: AppColors.titleColor,
+              fontWeight: FontWeight.bold,
+              fontStyle: FontStyle.italic,
+              
+            ),
+          ),
+        ),
 
         automaticallyImplyLeading: false,
       ),
@@ -83,6 +90,7 @@ class _HomeContent extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(bottom: 20),
             child: HouseDetailCard(
+              id: house['id'],
               imagePath: house['imagePath'],
               title: house['title'],
               price: house['price'],

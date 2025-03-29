@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class DislikeManager extends ChangeNotifier {
@@ -8,6 +7,7 @@ class DislikeManager extends ChangeNotifier {
 
   void addDislike(Map<String, dynamic> house) {
     _dislikedHouses.add({
+      'id': house['id'],
       'imagePath': house['imagePath'],
       'title': house['title'],
       'price': house['price'] ?? 'Price not set',
@@ -15,8 +15,8 @@ class DislikeManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  void removeDislike(String title) {
-    _dislikedHouses.removeWhere((house) => house['title'] == title);
+  void removeDislike(int id) {
+    _dislikedHouses.removeWhere((house) => house['id'] == id);
     notifyListeners();
   }
 }

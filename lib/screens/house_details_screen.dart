@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:house_swipe_app/providers/house_manager.dart';
+import 'package:house_swipe_app/providers/saved_manager.dart';
 import 'package:house_swipe_app/utils/theme.dart';
 import 'package:house_swipe_app/providers/favorite_manager.dart';
 import 'package:house_swipe_app/providers/dislike_manager.dart';
 import 'package:provider/provider.dart';
 
 class HouseDetailsScreen extends StatefulWidget {
+  final int id;
   final String imagePath;
   final String title;
   final String price;
@@ -18,6 +20,7 @@ class HouseDetailsScreen extends StatefulWidget {
   final String location;
 
   const HouseDetailsScreen({
+    required this.id,
     required this.imagePath,
     required this.title,
     required this.price,
@@ -35,17 +38,16 @@ class HouseDetailsScreen extends StatefulWidget {
 }
 
 class _HouseDetailsScreenState extends State<HouseDetailsScreen> {
-  bool isFavorite = false;
-  bool isSaved = false;
-
   @override
   Widget build(BuildContext context) {
     final favoriteManager = Provider.of<FavoriteManager>(context);
     final dislikeManager = Provider.of<DislikeManager>(context);
+    final savedManager = Provider.of<SavedManager>(context);
 
-    isFavorite = favoriteManager.favorites
-        .any((house) => house['title'] == widget.title);
-
+    final isFavorite =
+        favoriteManager.favorites.any((house) => house['id'] == widget.id);
+    final isSaved =
+        savedManager.savedHouses.any((house) => house['id'] == widget.id);
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
@@ -197,28 +199,33 @@ class _HouseDetailsScreenState extends State<HouseDetailsScreen> {
                           Provider.of<HouseManager>(context, listen: false);
                       final favoriteManager =
                           Provider.of<FavoriteManager>(context, listen: false);
-                      setState(() {
-                        isFavorite = !isFavorite;
-                        if (isFavorite) {
-                          favoriteManager.addFavorite({
-                            'imagePath': widget.imagePath,
-                            'title': widget.title,
-                            'price': widget.price,
-                          });
-                          houseManager.restoreFromDisliked(widget.title);
+                      final isCurrentlyFavorite = favoriteManager.favorites
+                          .any((h) => h['id'] == widget.id);
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content:
-                                    Text('${widget.title} added to favorites')),
-                          );
-                        } else {
-                          favoriteManager.removeFavorite(widget.title);
-                        }
-                      });
+                      if (isCurrentlyFavorite) {
+                        favoriteManager.removeFavorite(widget.id);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text(
+                                  '${widget.title} removed from favorites')),
+                        );
+                      } else {
+                        favoriteManager.addFavorite({
+                          'id': widget.id,
+                          'imagePath': widget.imagePath,
+                          'title': widget.title,
+                          'price': widget.price,
+                        });
+                        houseManager.restoreFromDisliked(widget.id);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content:
+                                  Text('${widget.title} added to favorites')),
+                        );
+                      }
                     },
                     child: Image.asset(
-                      isFavorite
+                      favoriteManager.favorites.any((h) => h['id'] == widget.id)
                           ? 'assets/images/favorite2.png'
                           : 'assets/images/favorite.png',
                       width: 40,
@@ -228,35 +235,70 @@ class _HouseDetailsScreenState extends State<HouseDetailsScreen> {
                   SizedBox(width: 10),
                   GestureDetector(
                     onTap: () {
+                      final favoriteManager =
+                          Provider.of<FavoriteManager>(context, listen: false);
+                      final dislikeManager =
+                          Provider.of<DislikeManager>(context, listen: false);
+                      final houseManager =
+                          Provider.of<HouseManager>(context, listen: false);
+
+                      if (favoriteManager.favorites
+                          .any((h) => h['id'] == widget.id)) {
+                        favoriteManager.removeFavorite(widget.id);
+                      }
+
                       dislikeManager.addDislike({
+                        'id': widget.id,
                         'imagePath': widget.imagePath,
                         'title': widget.title,
                         'price': widget.price,
                       });
 
-                      if (favoriteManager.favorites
-                          .any((h) => h['title'] == widget.title)) {
-                        favoriteManager.removeFavorite(widget.title);
-                        setState(() => isFavorite = false);
+                      if (houseManager.houses
+                          .any((h) => h['id'] == widget.id)) {
+                        houseManager.removeAndAddToDisliked(widget.id);
                       }
 
-                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text('${widget.title} moved to disliked')),
+                      );
+
+                      if (Navigator.of(context).canPop())
+                        Navigator.pop(context);
                     },
-                    child: Image.asset(
-                      'assets/images/close.png',
-                      width: 40,
-                      height: 40,
-                    ),
+                    child: Image.asset('assets/images/close.png',
+                        width: 40, height: 40),
                   ),
                   Spacer(),
                   GestureDetector(
                     onTap: () {
-                      setState(() {
-                        isSaved = !isSaved;
-                      });
+                      final savedManager =
+                          Provider.of<SavedManager>(context, listen: false);
+                      final isCurrentlySaved = savedManager.savedHouses
+                          .any((h) => h['id'] == widget.id);
+
+                      if (isCurrentlySaved) {
+                        savedManager.removeSaved(widget.id);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content:
+                                  Text('${widget.title} removed from saved')),
+                        );
+                      } else {
+                        savedManager.addSaved({
+                          'id': widget.id,
+                          'imagePath': widget.imagePath,
+                          'title': widget.title,
+                          'price': widget.price,
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${widget.title} saved')),
+                        );
+                      }
                     },
                     child: Image.asset(
-                      isSaved
+                      savedManager.savedHouses.any((h) => h['id'] == widget.id)
                           ? 'assets/images/save2.png'
                           : 'assets/images/save.png',
                       width: 40,
