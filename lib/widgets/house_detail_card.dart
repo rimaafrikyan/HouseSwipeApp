@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:house_swipe_app/providers/dislike_manager.dart';
-import 'package:house_swipe_app/providers/favorite_manager.dart';
 import 'package:house_swipe_app/providers/house_manager.dart';
-import 'package:house_swipe_app/providers/saved_manager.dart';
 import 'package:house_swipe_app/screens/home_screen.dart';
 import 'package:house_swipe_app/screens/house_details_screen.dart';
 import 'package:provider/provider.dart';
@@ -43,14 +40,14 @@ class _HouseDetailCardState extends State<HouseDetailCard> {
 
   @override
   Widget build(BuildContext context) {
-    final savedManager = Provider.of<SavedManager>(context);
-    final isSaved = savedManager.savedHouses.any((h) => h['id'] == widget.id);
-    final favoriteManager = Provider.of<FavoriteManager>(context);
+    final houseManager = Provider.of<HouseManager>(context);
+    final isSaved =
+        houseManager.savedHouses.any((house) => house['id'] == widget.id);
+    // final houseManager = Provider.of<HouseManager>(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = screenWidth * 0.9;
 
-    isFavorite =
-        favoriteManager.favorites.any((house) => house['id'] == widget.id);
+    isFavorite = houseManager.isFavorite(widget.id);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -221,14 +218,9 @@ class _HouseDetailCardState extends State<HouseDetailCard> {
                   setState(() {
                     isFavorite = !isFavorite;
                     if (isFavorite) {
-                      favoriteManager.addFavorite({
-                        'id': widget.id,
-                        'imagePath': widget.imagePath,
-                        'title': widget.title,
-                        'price': widget.price,
-                      });
+                      houseManager.addToFavorites(widget.id);
                     } else {
-                      favoriteManager.removeFavorite(widget.id);
+                      houseManager.removeFromFavorites(widget.id);
                     }
                   });
                 },
@@ -245,17 +237,14 @@ class _HouseDetailCardState extends State<HouseDetailCard> {
                 onTap: () {
                   final houseManager =
                       Provider.of<HouseManager>(context, listen: false);
-                  final favoriteManager =
-                      Provider.of<FavoriteManager>(context, listen: false);
 
-                  if (favoriteManager.favorites
-                      .any((h) => h['id'] == widget.id)) {
-                    favoriteManager.removeFavorite(widget.id);
+                  if (houseManager.isFavorite(widget.id)) {
+                    houseManager.removeFromFavorites(widget.id);
                   }
 
                   houseManager.removeAndAddToDisliked(widget.id);
 
-                  if (Navigator.of(context).canPop()) Navigator.pop(context);
+                  // if (Navigator.of(context).canPop()) Navigator.pop(context);
                 },
                 child: Image.asset('assets/images/close.png',
                     width: 40, height: 40),
@@ -263,8 +252,6 @@ class _HouseDetailCardState extends State<HouseDetailCard> {
               Spacer(),
               GestureDetector(
                 onTap: () {
-                  final savedManager =
-                      Provider.of<SavedManager>(context, listen: false);
                   final houseManager =
                       Provider.of<HouseManager>(context, listen: false);
 
@@ -274,16 +261,15 @@ class _HouseDetailCardState extends State<HouseDetailCard> {
                   );
 
                   if (fullHouseData.isNotEmpty) {
-                    if (savedManager.savedHouses
-                        .any((h) => h['id'] == widget.id)) {
-                      savedManager.removeSaved(widget.id);
+                    if (houseManager.isSaved(widget.id)) {
+                      houseManager.removeFromSaved(widget.id);
                     } else {
-                      savedManager.addSaved(fullHouseData);
+                      houseManager.addToSaved(widget.id);
                     }
                   }
                 },
                 child: Image.asset(
-                  savedManager.savedHouses.any((h) => h['id'] == widget.id)
+                  houseManager.isSaved(widget.id)
                       ? 'assets/images/save2.png'
                       : 'assets/images/save.png',
                   width: 40,

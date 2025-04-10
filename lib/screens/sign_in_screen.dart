@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:house_swipe_app/screens/home_screen.dart';
-import 'package:house_swipe_app/screens/sign_up_screen.dart';
-import 'package:house_swipe_app/services/api_service.dart';
+import 'package:house_swipe_app/screens/wallet_connected_screen.dart';
 import 'package:house_swipe_app/utils/theme.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -12,17 +11,11 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  final _formSignInKey = GlobalKey<FormState>();
-  bool rememberPassword = true;
-  bool isPasswordVisible = false;
-
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final ScrollController _contentScrollController = ScrollController();
 
   @override
   void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
+    _contentScrollController.dispose();
     super.dispose();
   }
 
@@ -35,8 +28,8 @@ class _SignInScreenState extends State<SignInScreen> {
           Center(
             child: Column(
               children: [
-                _buildWelcomeText(),
-                _buildSignInForm(),
+                _WelcomeText(),
+                _SignInSection(),
               ],
             ),
           ),
@@ -45,7 +38,7 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Widget _buildWelcomeText() {
+  Widget _WelcomeText() {
     return Expanded(
       flex: 2,
       child: Padding(
@@ -62,7 +55,7 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Widget _buildSignInForm() {
+  Widget _SignInSection() {
     return Expanded(
       flex: 4,
       child: SizedBox(
@@ -76,18 +69,11 @@ class _SignInScreenState extends State<SignInScreen> {
             ),
           ),
           child: SingleChildScrollView(
-            child: Form(
-              key: _formSignInKey,
-              child: Column(
-                children: [
-                  _buildSignInTitle(),
-                  _buildTextField('Email', false, emailController),
-                  _buildTextField('Password', true, passwordController),
-                  _buildRememberMeAndForgotPassword(),
-                  _buildSignInButton(),
-                  _buildSignUpPrompt(),
-                ],
-              ),
+            child: Column(
+              children: [
+                _SignInTitle(),
+                _Content(),
+              ],
             ),
           ),
         ),
@@ -95,11 +81,11 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Widget _buildSignInTitle() {
+  Widget _SignInTitle() {
     return Padding(
-      padding: const EdgeInsets.only(top: 20),
+      padding: const EdgeInsets.only(top: 30),
       child: Text(
-        'Sign in',
+        'Sign in with your wallet',
         style: TextStyle(
           fontSize: 30,
           fontWeight: FontWeight.bold,
@@ -110,206 +96,252 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Widget _buildTextField(
-      String labelText, bool isPassword, TextEditingController controller) {
+  Widget _Content() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-      child: TextFormField(
-        controller: controller,
-        obscureText: isPassword && !isPasswordVisible,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Please enter $labelText';
-          }
-          if (labelText == 'Email' && !value.contains('@')) {
-            return 'Please enter a valid email';
-          }
-          if (labelText == 'Password' && value.length < 8) {
-            return 'Password must be at least 8 characters long';
-          }
-          if (labelText == 'Repeat a password' &&
-              value != passwordController.text) {
-            return 'Passwords do not match';
-          }
-          return null;
-        },
-        decoration: InputDecoration(
-          labelText: labelText,
-          floatingLabelStyle: TextStyle(
-            color: Color.fromARGB(172, 23, 28, 39),
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Color.fromARGB(174, 123, 134, 158)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Color.fromARGB(174, 123, 134, 158)),
-          ),
-          filled: true,
-          fillColor: Color.fromARGB(174, 123, 134, 158),
-            suffixIcon: isPassword
-            ? IconButton(
-                icon: Icon(
-                  isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                  color: AppColors.primaryColor,
-                ),
-                onPressed: () {
-                  setState(() {
-                    isPasswordVisible = !isPasswordVisible; 
-                  });
-                },
-              )
-            : null,
+      padding: const EdgeInsets.only(top: 20, bottom: 20),
+      child: Container(
+        width: 300,
+        height: 400,
+        decoration: BoxDecoration(
+          color: Color.fromARGB(73, 50, 64, 89),
+          borderRadius: BorderRadius.circular(10),
         ),
-      ),
-    );
-  }
-
-  Widget _buildRememberMeAndForgotPassword() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Checkbox(
-                value: rememberPassword,
-                onChanged: (bool? value) {
-                  setState(() {
-                    rememberPassword = value!;
-                  });
-                },
-                activeColor: AppColors.primaryColor,
-              ),
-              Text(
-                'Remember me',
-                style: TextStyle(
-                  color: Colors.black45,
-                ),
-              ),
-            ],
-          ),
-          GestureDetector(
-            onTap: () {},
-            child: Text(
-              'Forget password?',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryColor,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSignInButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 70, vertical: 20),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: () async {
-            if (_formSignInKey.currentState!.validate() && rememberPassword) {
-              final response = await ApiService.signIn(
-                emailController.text,
-                passwordController.text,
-              );
-
-              if (response['success'] == true) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(response['message'])),
-                );
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const HomeScreen(),
-                  ),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(response['message'])),
-                );
-              }
-            } else if (!rememberPassword) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content:
-                      Text('Please agree to the processing of personal data'),
-                ),
-              );
-            }
-          },
-          //   onPressed: ()  {
-            
-          //       Navigator.push(
-          //         context,
-          //         MaterialPageRoute(
-          //           builder: (context) => const HomeScreen(),
-          //         ),
-          //       );
-              
-          // },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Color.fromARGB(174, 123, 134, 158),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(80),
-            ),
-          ),
-          child: const Text(
-            'Sign in',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              fontStyle: FontStyle.italic,
-              color: AppColors.titleColor,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSignUpPrompt() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 40),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            'Don\'t have an account? ',
-            style: TextStyle(
-              color: Colors.black45,
-            ),
-          ),
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SignUpScreen(),
-                  ),
-                );
-              },
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 15),
               child: Text(
-                'Sign up',
+                'Connect Wallet',
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
+                  fontSize: 25,
                   color: AppColors.primaryColor,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
+            Expanded(
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  scrollbarTheme: ScrollbarThemeData(
+                    thumbColor: MaterialStateProperty.all(
+                        Color.fromARGB(73, 50, 64, 89)),
+                    trackColor: MaterialStateProperty.all(Colors.grey[300]),
+                    thickness: MaterialStateProperty.all(8.0),
+                    radius: Radius.circular(4),
+                  ),
+                ),
+                child: Scrollbar(
+                  controller: _contentScrollController,
+                  thumbVisibility: true,
+                  // thickness: 8,
+                  // radius: Radius.circular(4),
+                  child: SingleChildScrollView(
+                    controller: _contentScrollController,
+                    physics: ClampingScrollPhysics(),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _WalletOption(
+                          'MetaMask',
+                          'assets/images/MetaMask.png',
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WalletConnectedScreen(
+                                      walletType: 'MetaMask')),
+                            );
+                          },
+                        ),
+                        _WalletOption(
+                          'Coinbase Wallet',
+                          'assets/images/Coinbase.png',
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WalletConnectedScreen(
+                                      walletType: 'Coinbase')),
+                            );
+                          },
+                        ),
+                        _WalletOption(
+                          'WalletConnect',
+                          'assets/images/WalletConnect.png',
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WalletConnectedScreen(
+                                      walletType: 'WalletConnect')),
+                            );
+                          },
+                        ),
+                        _WalletOption(
+                          'Phantom',
+                          'assets/images/Phantom.png',
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WalletConnectedScreen(
+                                      walletType: 'Phantom')),
+                            );
+                          },
+                        ),
+                        _WalletOption(
+                          'Zerion',
+                          'assets/images/Zerion.png',
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WalletConnectedScreen(
+                                      walletType: 'Zerion')),
+                            );
+                          },
+                        ),
+                        _WalletOption(
+                          'Ronin',
+                          'assets/images/Ronin.png',
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WalletConnectedScreen(
+                                      walletType: 'Ronin')),
+                            );
+                          },
+                        ),
+                        _WalletOption(
+                          'BitKeep',
+                          'assets/images/BitKeep.png',
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WalletConnectedScreen(
+                                      walletType: 'BitKeep')),
+                            );
+                          },
+                        ),
+                        _WalletOption(
+                          'Kaikas',
+                          'assets/images/Kaikas.png',
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WalletConnectedScreen(
+                                      walletType: 'Kaikas')),
+                            );
+                          },
+                        ),
+                        _WalletOption(
+                          'Core',
+                          'assets/images/Core.png',
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WalletConnectedScreen(
+                                      walletType: 'Core')),
+                            );
+                          },
+                        ),
+                        _WalletOption(
+                          'Fortmatic',
+                          'assets/images/Fortmatic.png',
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WalletConnectedScreen(
+                                      walletType: 'Fortmatic')),
+                            );
+                          },
+                        ),
+                        _WalletOption(
+                          'Bitski',
+                          'assets/images/Bitski.png',
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WalletConnectedScreen(
+                                      walletType: 'Bitski')),
+                            );
+                          },
+                        ),
+                        _WalletOption(
+                          'OperaTouch',
+                          'assets/images/OperaTouch.png',
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WalletConnectedScreen(
+                                      walletType: 'OperaTouch')),
+                            );
+                          },
+                        ),
+                        _WalletOption(
+                          'Trust',
+                          'assets/images/Trust.png',
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WalletConnectedScreen(
+                                      walletType: 'Trust')),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _WalletOption(String name, String iconPath, {VoidCallback? onTap}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 25),
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          height: 50,
+          decoration: BoxDecoration(
+            color: Color.fromARGB(108, 50, 64, 89),
+            borderRadius: BorderRadius.circular(10),
           ),
-        ],
+          child: Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Image.asset(
+                  iconPath,
+                  width: 40,
+                  height: 40,
+                ),
+                SizedBox(width: 10),
+                Text(
+                  name,
+                  style: TextStyle(
+                    color: AppColors.titleColor,
+                    fontSize: 20,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

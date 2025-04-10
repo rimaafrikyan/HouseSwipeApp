@@ -1,77 +1,5 @@
-// import 'package:flutter/material.dart';
-// import 'package:house_swipe_app/utils/theme.dart';
-
-// class SavedScreen extends StatefulWidget {
-//   const SavedScreen({super.key});
-
-//   @override
-//   State<SavedScreen> createState() => _SavedScreenState();
-// }
-
-// class _SavedScreenState extends State<SavedScreen> {
-//   final List<String> images = [
-//     'assets/images/home1.png',
-//     'assets/images/home2.png',
-//     'assets/images/home2.png',
-//     'assets/images/home1.png',
-//   ];
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: AppColors.backgroundColor,
-//       body: LayoutBuilder(
-//         builder: (context, constraints) {
-//           final double screenWidth = constraints.maxWidth;
-//           final double itemSize = screenWidth * 0.35;
-//           final double saveIconSize = screenWidth * 0.06;
-
-//           return Padding(
-//             padding: const EdgeInsets.all(16),
-//             child: Column(
-//               children: [
-//                 SizedBox(
-//                   child: Image.asset('assets/images/save.png'),
-//                 ),
-//                 const SizedBox(height: 20),
-//                 Expanded(
-//                   child: GridView.builder(
-//                     gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-//                       maxCrossAxisExtent: itemSize,
-//                       childAspectRatio: 1,
-//                       mainAxisSpacing: 8,
-//                       crossAxisSpacing: 8,
-//                     ),
-//                     itemCount: images.length,
-//                     itemBuilder: (context, index) {
-//                       return Stack(
-//                         children: [
-//                           ClipRRect(
-//                             borderRadius: BorderRadius.circular(12),
-//                             child: Image.asset(
-//                               images[index],
-//                               width: itemSize,
-//                               height: itemSize,
-//                               fit: BoxFit.cover,
-//                             ),
-//                           ),
-
-//                         ],
-//                       );
-//                     },
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           );
-//         },
-//       ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
-import 'package:house_swipe_app/providers/saved_manager.dart';
+import 'package:house_swipe_app/providers/house_manager.dart';
 import 'package:house_swipe_app/screens/house_details_screen.dart';
 import 'package:house_swipe_app/utils/theme.dart';
 import 'package:house_swipe_app/widgets/house_leked_card.dart';
@@ -82,23 +10,7 @@ class SavedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final savedManager = Provider.of<SavedManager>(context);
-
-    if (savedManager.savedHouses.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/images/save.png', width: 60, height: 60),
-            const SizedBox(height: 20),
-            const Text(
-              "No saved houses yet",
-              style: TextStyle(fontSize: 18),
-            ),
-          ],
-        ),
-      );
-    }
+    final houseManager = Provider.of<HouseManager>(context);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -112,33 +24,47 @@ class SavedScreen extends StatelessWidget {
               child: GridView.count(
                 crossAxisCount: 1,
                 childAspectRatio: 3,
-                children: savedManager.savedHouses.map((house) {
+                children: houseManager.savedHouses.map((house) {
+                  Map<String, dynamic> fullHouseData;
+
+                  try {
+                    fullHouseData = houseManager.houses
+                        .firstWhere((h) => h['id'] == house['id']);
+                  } catch (e) {
+                    try {
+                      fullHouseData = houseManager.dislikedHouses
+                          .firstWhere((h) => h['id'] == house['id']);
+                    } catch (e) {
+                      fullHouseData = house;
+                    }
+                  }
+
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => HouseDetailsScreen(
-                            id: house['id'],
-                            imagePath: house['imagePath'],
-                            title: house['title'],
-                            price: house['price'] ?? 'No price',
-                            description: house['description'] ?? '',
-                            area: house['area'] ?? '',
-                            quantity: house['quantity'] ?? '',
+                            id: fullHouseData['id'],
+                            imagePath: fullHouseData['imagePath'],
+                            title: fullHouseData['title'],
+                            price: fullHouseData['price'] ?? 'No price',
+                            description: fullHouseData['description'] ?? '',
+                            area: fullHouseData['area'] ?? '',
+                            quantity: fullHouseData['quantity'] ?? '',
                             detailedDescription:
-                                house['detailedDescription'] ?? '',
-                            keyFeatures:
-                                List<String>.from(house['keyFeatures'] ?? []),
-                            location: house['location'] ?? '',
+                                fullHouseData['detailedDescription'] ?? '',
+                            keyFeatures: List<String>.from(
+                                fullHouseData['keyFeatures'] ?? []),
+                            location: fullHouseData['location'] ?? '',
                           ),
                         ),
                       );
                     },
                     child: HouseLekedCard(
-                      imagePath: house['imagePath'],
-                      title: house['title'],
-                      price: house['price'] ?? 'No price',
+                      imagePath: fullHouseData['imagePath'],
+                      title: fullHouseData['title'],
+                      price: fullHouseData['price'] ?? 'No price',
                     ),
                   );
                 }).toList(),

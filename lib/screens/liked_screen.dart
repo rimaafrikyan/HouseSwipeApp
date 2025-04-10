@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:house_swipe_app/providers/favorite_manager.dart';
 import 'package:house_swipe_app/providers/house_manager.dart';
 import 'package:house_swipe_app/screens/disliked_screen.dart';
 import 'package:house_swipe_app/screens/home_screen.dart';
@@ -18,7 +17,6 @@ class LikedScreen extends StatefulWidget {
 class _LikedScreenState extends State<LikedScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final favoriteManager = FavoriteManager();
 
   @override
   void initState() {
@@ -34,7 +32,6 @@ class _LikedScreenState extends State<LikedScreen>
 
   @override
   Widget build(BuildContext context) {
-    final favoriteManager = Provider.of<FavoriteManager>(context);
     final houseManager = Provider.of<HouseManager>(context);
 
     return CustomTabBar(
@@ -52,12 +49,13 @@ class _LikedScreenState extends State<LikedScreen>
                 child: GridView.count(
                   crossAxisCount: 1,
                   childAspectRatio: 3,
-                  children: favoriteManager.favorites.map((house) {
+                  children: houseManager.favoriteHouses.map((house) {
                     final fullHouseData = houseManager.houses.firstWhere(
                       (h) => h['id'] == house['id'],
                       orElse: () => {},
                     );
-
+                    // final fullHouseData =
+                    //     houseManager.findHouseById(house['id']) ?? {};
                     return GestureDetector(
                       onTap: () {
                         if (fullHouseData.isNotEmpty) {

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:house_swipe_app/providers/dislike_manager.dart';
 import 'package:house_swipe_app/providers/house_manager.dart';
 import 'package:house_swipe_app/screens/home_screen.dart';
 import 'package:house_swipe_app/screens/house_details_screen.dart';
@@ -18,11 +17,6 @@ class _DislikedScreenState extends State<DislikedScreen> {
   @override
   Widget build(BuildContext context) {
     final houseManager = Provider.of<HouseManager>(context);
-
-    if (houseManager.dislikedHouses.isEmpty) {
-      return const Center(child: Text("No disliked houses yet"));
-    }
-
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: Padding(

@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:house_swipe_app/providers/house_manager.dart';
-import 'package:house_swipe_app/providers/saved_manager.dart';
 import 'package:house_swipe_app/utils/theme.dart';
-import 'package:house_swipe_app/providers/favorite_manager.dart';
-import 'package:house_swipe_app/providers/dislike_manager.dart';
 import 'package:provider/provider.dart';
 
 class HouseDetailsScreen extends StatefulWidget {
@@ -40,14 +37,11 @@ class HouseDetailsScreen extends StatefulWidget {
 class _HouseDetailsScreenState extends State<HouseDetailsScreen> {
   @override
   Widget build(BuildContext context) {
-    final favoriteManager = Provider.of<FavoriteManager>(context);
-    final dislikeManager = Provider.of<DislikeManager>(context);
-    final savedManager = Provider.of<SavedManager>(context);
+    final houseManager = Provider.of<HouseManager>(context);
 
     final isFavorite =
-        favoriteManager.favorites.any((house) => house['id'] == widget.id);
-    final isSaved =
-        savedManager.savedHouses.any((house) => house['id'] == widget.id);
+        houseManager.favoriteHouses.any((house) => house['id'] == widget.id);
+    final isSaved = houseManager.isSaved(widget.id);
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
@@ -197,26 +191,18 @@ class _HouseDetailsScreenState extends State<HouseDetailsScreen> {
                     onTap: () {
                       final houseManager =
                           Provider.of<HouseManager>(context, listen: false);
-                      final favoriteManager =
-                          Provider.of<FavoriteManager>(context, listen: false);
-                      final isCurrentlyFavorite = favoriteManager.favorites
+                      final isCurrentlyFavorite = houseManager.favoriteHouses
                           .any((h) => h['id'] == widget.id);
 
                       if (isCurrentlyFavorite) {
-                        favoriteManager.removeFavorite(widget.id);
+                        houseManager.removeFromFavorites(widget.id);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                               content: Text(
                                   '${widget.title} removed from favorites')),
                         );
                       } else {
-                        favoriteManager.addFavorite({
-                          'id': widget.id,
-                          'imagePath': widget.imagePath,
-                          'title': widget.title,
-                          'price': widget.price,
-                        });
-                        houseManager.restoreFromDisliked(widget.id);
+                        houseManager.addToFavorites(widget.id);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                               content:
@@ -225,7 +211,7 @@ class _HouseDetailsScreenState extends State<HouseDetailsScreen> {
                       }
                     },
                     child: Image.asset(
-                      favoriteManager.favorites.any((h) => h['id'] == widget.id)
+                      houseManager.isFavorite(widget.id)
                           ? 'assets/images/favorite2.png'
                           : 'assets/images/favorite.png',
                       width: 40,
@@ -235,37 +221,31 @@ class _HouseDetailsScreenState extends State<HouseDetailsScreen> {
                   SizedBox(width: 10),
                   GestureDetector(
                     onTap: () {
-                      final favoriteManager =
-                          Provider.of<FavoriteManager>(context, listen: false);
-                      final dislikeManager =
-                          Provider.of<DislikeManager>(context, listen: false);
                       final houseManager =
                           Provider.of<HouseManager>(context, listen: false);
 
-                      if (favoriteManager.favorites
-                          .any((h) => h['id'] == widget.id)) {
-                        favoriteManager.removeFavorite(widget.id);
+                      if (houseManager.isFavorite(widget.id)) {
+                        houseManager.removeFromFavorites(widget.id);
                       }
 
-                      dislikeManager.addDislike({
+                      houseManager.addToDislikedIfNotExists(widget.id, {
                         'id': widget.id,
                         'imagePath': widget.imagePath,
                         'title': widget.title,
                         'price': widget.price,
+                        'description': widget.description,
+                        'area': widget.area,
+                        'quantity': widget.quantity,
                       });
-
-                      if (houseManager.houses
-                          .any((h) => h['id'] == widget.id)) {
-                        houseManager.removeAndAddToDisliked(widget.id);
-                      }
 
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                             content: Text('${widget.title} moved to disliked')),
                       );
 
-                      if (Navigator.of(context).canPop())
+                      if (Navigator.of(context).canPop()) {
                         Navigator.pop(context);
+                      }
                     },
                     child: Image.asset('assets/images/close.png',
                         width: 40, height: 40),
@@ -273,32 +253,25 @@ class _HouseDetailsScreenState extends State<HouseDetailsScreen> {
                   Spacer(),
                   GestureDetector(
                     onTap: () {
-                      final savedManager =
-                          Provider.of<SavedManager>(context, listen: false);
-                      final isCurrentlySaved = savedManager.savedHouses
-                          .any((h) => h['id'] == widget.id);
+                      final houseManager = context.read<HouseManager>();
+                      final isCurrentlySaved = houseManager.isSaved(widget.id);
 
                       if (isCurrentlySaved) {
-                        savedManager.removeSaved(widget.id);
+                        houseManager.removeFromSaved(widget.id);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                               content:
                                   Text('${widget.title} removed from saved')),
                         );
                       } else {
-                        savedManager.addSaved({
-                          'id': widget.id,
-                          'imagePath': widget.imagePath,
-                          'title': widget.title,
-                          'price': widget.price,
-                        });
+                        houseManager.addToSaved(widget.id);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('${widget.title} saved')),
                         );
                       }
                     },
                     child: Image.asset(
-                      savedManager.savedHouses.any((h) => h['id'] == widget.id)
+                      houseManager.isSaved(widget.id)
                           ? 'assets/images/save2.png'
                           : 'assets/images/save.png',
                       width: 40,

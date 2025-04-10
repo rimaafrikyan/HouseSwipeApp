@@ -43,21 +43,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(194, 115, 130, 146),
-        title: Center(
-          child: Text(
-            'Swipe your dream home',
-            style: TextStyle(
-              color: AppColors.titleColor,
-              fontWeight: FontWeight.bold,
-              fontStyle: FontStyle.italic,
-              
+          backgroundColor: const Color.fromARGB(194, 115, 130, 146),
+          title: Center(
+            child: Text(
+              'Swipe your dream home',
+              style: TextStyle(
+                color: AppColors.titleColor,
+                fontWeight: FontWeight.bold,
+                fontStyle: FontStyle.italic,
+              ),
             ),
           ),
-        ),
-
-        automaticallyImplyLeading: false,
-      ),
+          automaticallyImplyLeading: false),
       body: SafeArea(
         child: IndexedStack(
           index: _selectedIndex,
@@ -78,31 +75,97 @@ class _HomeContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final houseManager = Provider.of<HouseManager>(context);
-    return RefreshIndicator(
-      onRefresh: () async {
-        await Future.delayed(const Duration(seconds: 1));
+
+    final visibleHouses = houseManager.houses.where((house) {
+      return !houseManager.isFavorite(house['id']);
+    }).toList();
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      itemCount: houseManager.houses.length,
+      itemBuilder: (context, index) {
+        final house = houseManager.houses[index];
+        if (houseManager.dislikedHouses.contains(house['id'])) {
+          return SizedBox.shrink();
+        }
+        return _SwipeableHouseCard(
+          key: ValueKey(house['id']),
+          house: house,
+          onSwipeRight: () {
+            houseManager.addToFavorites(house['id']);
+          },
+          onSwipeLeft: () => houseManager.removeAndAddToDisliked(house['id']),
+        );
       },
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        itemCount: houseManager.houses.length,
-        itemBuilder: (context, index) {
-          final house = houseManager.houses[index];
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: HouseDetailCard(
-              id: house['id'],
-              imagePath: house['imagePath'],
-              title: house['title'],
-              price: house['price'],
-              description: house['description'],
-              area: house['area'],
-              quantity: house['quantity'],
-              detailedDescription: house['detailedDescription'],
-              keyFeatures: house['keyFeatures'],
-              location: house['location'],
+    );
+  }
+}
+
+class _SwipeableHouseCard extends StatefulWidget {
+  final Map<String, dynamic> house;
+  final VoidCallback onSwipeRight;
+  final VoidCallback onSwipeLeft;
+
+  const _SwipeableHouseCard({
+    required Key key,
+    required this.house,
+    required this.onSwipeRight,
+    required this.onSwipeLeft,
+  }) : super(key: key);
+
+  @override
+  State<_SwipeableHouseCard> createState() => _SwipeableHouseCardState();
+}
+
+class _SwipeableHouseCardState extends State<_SwipeableHouseCard> {
+  double _offset = 0.0;
+  bool _isSwiped = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isSwiped) return const SizedBox.shrink();
+
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onHorizontalDragUpdate: (details) {
+        setState(() => _offset += details.delta.dx);
+      },
+      onHorizontalDragEnd: (details) {
+        if (_offset.abs() > 100) {
+          setState(() => _isSwiped = true);
+          _offset > 0 ? widget.onSwipeRight() : widget.onSwipeLeft();
+        } else {
+          setState(() => _offset = 0);
+        }
+      },
+      //
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        child: Transform(
+          transform: Matrix4.identity()
+            ..translate(_offset)
+            ..rotateZ(_offset / 100 * 0.2),
+          alignment: Alignment.center,
+          child: Opacity(
+            opacity: (1 - _offset.abs() / 300).clamp(0.0, 1.0),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: HouseDetailCard(
+                id: widget.house['id'],
+                imagePath: widget.house['imagePath'],
+                title: widget.house['title'],
+                price: widget.house['price'],
+                description: widget.house['description'],
+                area: widget.house['area'],
+                quantity: widget.house['quantity'],
+                detailedDescription: widget.house['detailedDescription'],
+                keyFeatures: widget.house['keyFeatures'],
+                location: widget.house['location'],
+              ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
