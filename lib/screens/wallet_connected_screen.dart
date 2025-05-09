@@ -4,10 +4,13 @@ import 'package:house_swipe_app/utils/theme.dart';
 
 class WalletConnectedScreen extends StatelessWidget {
   final String walletType;
+  final String address;
 
   const WalletConnectedScreen({
     super.key,
     required this.walletType,
+    required this.address,
+
   });
 
   String getWalletImagePath() {
@@ -90,6 +93,7 @@ class WalletConnectedScreen extends StatelessWidget {
                       height: 60,
                       fit: BoxFit.contain,
                     ),
+                    Text('$address'),
                     Text(
                       'Welcome to HomeApp',
                       style: TextStyle(

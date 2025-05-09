@@ -34,6 +34,9 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const SignInScreen(),
+      // home: const HomeScreen(),
+      // home: const WelcomeScreen(),
+
       useInheritedMediaQuery: true,
       locale: DevicePreview.locale(context),
       builder: DevicePreview.appBuilder,

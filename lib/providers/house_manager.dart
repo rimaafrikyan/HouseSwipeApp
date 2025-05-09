@@ -171,12 +171,16 @@ class HouseManager extends ChangeNotifier {
   final _favoriteIds = <int>{};
   final _savedIds = <int>{};
 
+  // ========== House Removal & Restoration ==========
+
+// Permanently removes a house from the main list.
   void removeHouse(int id) {
     houses.removeWhere((house) => house['id'] == id);
     notifyListeners();
     debugPrint('House $id completely removed');
   }
 
+// Moves a house from the main list to the disliked list.
   void removeAndAddToDisliked(int id) {
     try {
       if (_favoriteIds.contains(id)) {
@@ -198,6 +202,7 @@ class HouseManager extends ChangeNotifier {
     }
   }
 
+// Restores a house from the disliked list to the main list.
   void restoreFromDisliked(int id) {
     try {
       final house = dislikedHouses.firstWhere((h) => h['id'] == id);
@@ -210,19 +215,20 @@ class HouseManager extends ChangeNotifier {
     }
   }
 
+// Adds a house to disliked list if not already present.
   void addToDislikedIfNotExists(int id, Map<String, dynamic> houseData) {
     try {
       if (dislikedHouses.any((h) => h['id'] == id)) {
         debugPrint('House $id is already in disliked list');
         return;
       }
-
+// Remove from favorites if needed
       if (_favoriteIds.contains(id)) {
         favoriteHouses.removeWhere((h) => h['id'] == id);
         _favoriteIds.remove(id);
         debugPrint('Removed house $id from favorites');
       }
-
+// Move from main list or add directly
       if (houses.any((h) => h['id'] == id)) {
         removeAndAddToDisliked(id);
       } else {
@@ -236,6 +242,9 @@ class HouseManager extends ChangeNotifier {
     }
   }
 
+  // ========== Favorite Management ==========
+
+// Adds a house to favorites.
   void addToFavorites(int id) {
     try {
       if (_favoriteIds.contains(id)) return;
@@ -246,8 +255,8 @@ class HouseManager extends ChangeNotifier {
         return;
       }
 
+// Handle if house was in disliked list
       final fromDisliked = dislikedHouses.any((h) => h['id'] == id);
-
       favoriteHouses.add(Map<String, dynamic>.from(house));
       _favoriteIds.add(id);
 
@@ -255,7 +264,7 @@ class HouseManager extends ChangeNotifier {
         dislikedHouses.removeWhere((h) => h['id'] == id);
         debugPrint('Removed house $id from disliked list');
       }
-
+// Ensure house exists in main list
       if (!houses.any((h) => h['id'] == id)) {
         houses.add(Map<String, dynamic>.from(house));
         debugPrint('Added house $id to main houses list');
@@ -269,6 +278,7 @@ class HouseManager extends ChangeNotifier {
     }
   }
 
+// Removes a house from favorites.
   void removeFromFavorites(int id) {
     favoriteHouses.removeWhere((house) => house['id'] == id);
     _favoriteIds.remove(id);
@@ -277,11 +287,13 @@ class HouseManager extends ChangeNotifier {
     debugPrint('House $id removed from favorites');
   }
 
+// Checks if a house is marked as favorite.
   bool isFavorite(int id) {
     assert(id != null, 'House ID cannot be null');
     return _favoriteIds.contains(id);
   }
 
+// Toggles favorite status of a house.
   void toggleFavorite(int id) {
     if (isFavorite(id)) {
       removeFromFavorites(id);
@@ -290,6 +302,7 @@ class HouseManager extends ChangeNotifier {
     }
   }
 
+// Clears all favorites.
   void clearFavorites() {
     favoriteHouses.clear();
     _favoriteIds.clear();
@@ -297,6 +310,9 @@ class HouseManager extends ChangeNotifier {
     debugPrint('All favorites cleared');
   }
 
+  // ========== Saved Management ==========
+
+// Adds a house to saved list.
   void addToSaved(int id) {
     try {
       if (_savedIds.contains(id)) return;
@@ -317,6 +333,7 @@ class HouseManager extends ChangeNotifier {
     }
   }
 
+// Removes a house from saved list.
   void removeFromSaved(int id) {
     savedHouses.removeWhere((house) => house['id'] == id);
     _savedIds.remove(id);
@@ -325,11 +342,13 @@ class HouseManager extends ChangeNotifier {
     debugPrint('House $id removed from saved');
   }
 
+// Checks if a house is saved.
   bool isSaved(int id) {
     assert(id != null, 'House ID cannot be null');
     return _savedIds.contains(id);
   }
 
+// Toggles saved status of a house.
   void toggleSaved(int id) {
     if (isSaved(id)) {
       removeFromSaved(id);
@@ -338,6 +357,7 @@ class HouseManager extends ChangeNotifier {
     }
   }
 
+// Clears all saved houses.
   void clearSaved() {
     savedHouses.clear();
     _savedIds.clear();
@@ -345,6 +365,9 @@ class HouseManager extends ChangeNotifier {
     debugPrint('All saved houses cleared');
   }
 
+  // ========== Utility Methods ==========
+
+// Finds a house by ID across all lists (main, favorites, disliked, saved).
   Map<String, dynamic>? findHouseById(int id) {
     final allLists = [houses, favoriteHouses, dislikedHouses, savedHouses];
 
@@ -359,6 +382,7 @@ class HouseManager extends ChangeNotifier {
     return null;
   }
 
+// Ensures a house exists in the main list (used when removing from favorites/saved).
   void _ensureHouseInMainList(int id) {
     if (houses.any((h) => h['id'] == id)) return;
 
@@ -372,6 +396,7 @@ class HouseManager extends ChangeNotifier {
     }
   }
 
+// Placeholder for async house loading
   Future<void> loadHouses() async {
     try {
       notifyListeners();

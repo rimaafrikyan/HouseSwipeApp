@@ -144,156 +144,190 @@ class _SignInScreenState extends State<SignInScreen> {
                         _WalletOption(
                           'MetaMask',
                           'assets/images/MetaMask.png',
+                          '0xAbC1...5678',
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => WalletConnectedScreen(
-                                      walletType: 'MetaMask')),
+                                      walletType: 'MetaMask',
+                                      address: '0xAbC1...5678')),
                             );
                           },
                         ),
                         _WalletOption(
                           'Coinbase Wallet',
                           'assets/images/Coinbase.png',
+                          '0x45f8...8123',
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => WalletConnectedScreen(
-                                      walletType: 'Coinbase')),
+                                      walletType: 'Coinbase',
+                                      address: '0x45f8...8123')),
                             );
                           },
                         ),
                         _WalletOption(
                           'WalletConnect',
                           'assets/images/WalletConnect.png',
+                          '0x998E...D456',
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => WalletConnectedScreen(
-                                      walletType: 'WalletConnect')),
+                                        walletType: 'WalletConnect',
+                                        address: '0x998E...D456',
+                                      )),
                             );
                           },
                         ),
                         _WalletOption(
                           'Phantom',
                           'assets/images/Phantom.png',
+                          '0xE0fA...1100',
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => WalletConnectedScreen(
-                                      walletType: 'Phantom')),
+                                      walletType: 'Phantom',
+                                      address: '0xE0fA...1100')),
                             );
                           },
                         ),
                         _WalletOption(
                           'Zerion',
                           'assets/images/Zerion.png',
+                          '0x53Af...9871',
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => WalletConnectedScreen(
-                                      walletType: 'Zerion')),
+                                      walletType: 'Zerion',
+                                      address: '0x53Af...9871')),
                             );
                           },
                         ),
                         _WalletOption(
                           'Ronin',
                           'assets/images/Ronin.png',
+                          '0x71Ca...EF09',
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => WalletConnectedScreen(
-                                      walletType: 'Ronin')),
+                                        walletType: 'Ronin',
+                                        address: '0x71Ca...EF09',
+                                      )),
                             );
                           },
                         ),
                         _WalletOption(
                           'BitKeep',
                           'assets/images/BitKeep.png',
+                          '0x23D4...Cd34',
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => WalletConnectedScreen(
-                                      walletType: 'BitKeep')),
+                                        walletType: 'BitKeep',
+                                        address: '0x23D4...Cd34',
+                                      )),
                             );
                           },
                         ),
                         _WalletOption(
                           'Kaikas',
                           'assets/images/Kaikas.png',
+                          '0xF3e9...De21',
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => WalletConnectedScreen(
-                                      walletType: 'Kaikas')),
+                                        walletType: 'Kaikas',
+                                        address: '0xF3e9...De21',
+                                      )),
                             );
                           },
                         ),
                         _WalletOption(
                           'Core',
                           'assets/images/Core.png',
+                          '0x7Cb1...9876',
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => WalletConnectedScreen(
-                                      walletType: 'Core')),
+                                        walletType: 'Core',
+                                        address: '0x7Cb1...9876',
+                                      )),
                             );
                           },
                         ),
                         _WalletOption(
                           'Fortmatic',
                           'assets/images/Fortmatic.png',
+                          '0x19aB...67aB',
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => WalletConnectedScreen(
-                                      walletType: 'Fortmatic')),
+                                        walletType: 'Fortmatic',
+                                        address: '0x19aB...67aB',
+                                      )),
                             );
                           },
                         ),
                         _WalletOption(
                           'Bitski',
                           'assets/images/Bitski.png',
+                          '0xAAee...4501',
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => WalletConnectedScreen(
-                                      walletType: 'Bitski')),
+                                        walletType: 'Bitski',
+                                        address: '0xAAee...4501',
+                                      )),
                             );
                           },
                         ),
                         _WalletOption(
                           'OperaTouch',
                           'assets/images/OperaTouch.png',
+                          '0x3456...AB98',
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => WalletConnectedScreen(
-                                      walletType: 'OperaTouch')),
+                                      walletType: 'OperaTouch',
+                                      address: '0x3456...AB98')),
                             );
                           },
                         ),
                         _WalletOption(
                           'Trust',
                           'assets/images/Trust.png',
+                          '0x00Ab...3344',
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => WalletConnectedScreen(
-                                      walletType: 'Trust')),
+                                        walletType: 'Trust',
+                                        address: '0x00Ab...3344',
+                                      )),
                             );
                           },
                         ),
@@ -309,7 +343,8 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Widget _WalletOption(String name, String iconPath, {VoidCallback? onTap}) {
+  Widget _WalletOption(String name, String iconPath, String address,
+      {VoidCallback? onTap}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 25),
       child: InkWell(

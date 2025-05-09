@@ -138,7 +138,7 @@ class _SwipeableHouseCardState extends State<_SwipeableHouseCard> {
           setState(() => _offset = 0);
         }
       },
-      //
+      
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
